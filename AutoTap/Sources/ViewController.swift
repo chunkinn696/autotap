@@ -76,15 +76,15 @@ final class ViewController: UIViewController {
     @objc private func refreshTargetInfo() {
         let targets = TargetAppManager.loadTargets()
         if targets.isEmpty {
-            targetLabel.text = "未选择目标。点击「选择目标 App」勾选要连点的 App，进入后悬浮球自动出现。"
+            targetLabel.text = "Chưa chọn mục tiêu. Bấm «Chọn App mục tiêu» để chọn App cần bấm, vào App thì quả cầu nổi tự hiện."
             enterTargetButton.isEnabled = false
             enterTargetButton.alpha = 0.4
         } else {
             let names = targets.compactMap { id in
                 TargetAppManager.installedApps().first { $0.bundleID == id }?.name
             }
-            let display = names.isEmpty ? targets.joined(separator: "、") : names.joined(separator: "、")
-            targetLabel.text = "目标：\(display)（\(targets.count) 个）\n悬浮球只会在这些 App 内显示。"
+            let display = names.isEmpty ? targets.joined(separator: ", ") : names.joined(separator: ", ")
+            targetLabel.text = "Mục tiêu: \(display) (\(targets.count) App)\nQuả cầu nổi chỉ hiện trong các App này."
             enterTargetButton.isEnabled = true
             enterTargetButton.alpha = 1
         }
@@ -100,15 +100,15 @@ final class ViewController: UIViewController {
     @objc private func enterTargetTapped() {
         let targets = TargetAppManager.loadTargets()
         guard let first = targets.first else {
-            toast("请先选择目标 App")
+            toast("Hãy chọn App mục tiêu trước")
             return
         }
         // 同步悬浮球连点间隔到共享配置，tweak 使用
         TargetAppManager.saveIntervalMs(readTargetInterval())
         if TargetAppManager.openApp(bundleID: first) {
-            toast("已进入 \(first)，悬浮球将自动显示")
+            toast("Đã vào \(first), quả cầu nổi sẽ tự hiện")
         } else {
-            toast("打开失败：目标 App 可能未安装或权限不足")
+            toast("Mở thất bại: App mục tiêu có thể chưa cài hoặc thiếu quyền")
         }
     }
 
@@ -153,7 +153,7 @@ final class ViewController: UIViewController {
         let tapOnCanvas = UITapGestureRecognizer(target: self, action: #selector(canvasTapped(_:)))
         canvas.addGestureRecognizer(tapOnCanvas)
 
-        canvasLabel.text = "拖动圆圈调整点击位置，长按圆圈开始/停止"
+        canvasLabel.text = "Kéo vòng tròn để chỉnh vị trí bấm, giữ vòng tròn để bắt đầu/dừng"
         canvasLabel.textColor = .secondaryLabel
         canvasLabel.font = .systemFont(ofSize: 13)
         canvasLabel.textAlignment = .center
@@ -168,7 +168,7 @@ final class ViewController: UIViewController {
         // ---- 输入区 ----
         let xLabel = makeLabel("X (0~1)")
         let yLabel = makeLabel("Y (0~1)")
-        let intervalLabel = makeLabel("间隔(ms)")
+        let intervalLabel = makeLabel("Khoảng cách (ms)")
         configureField(xField, placeholder: "0.5")
         configureField(yField, placeholder: "0.5")
         configureField(intervalField, placeholder: "200", keyboard: .numberPad)
@@ -190,7 +190,7 @@ final class ViewController: UIViewController {
         sizeSlider.maximumValue = 160
         sizeSlider.value = Float(clickCircle.diameter)
         sizeSlider.addTarget(self, action: #selector(sizeSliderChanged(_:)), for: .valueChanged)
-        let sizeRow = UIStackView(arrangedSubviews: [makeLabel("圆圈大小"), sizeSlider])
+        let sizeRow = UIStackView(arrangedSubviews: [makeLabel("Cỡ vòng tròn"), sizeSlider])
         sizeRow.axis = .horizontal
         sizeRow.spacing = 10
         sizeRow.alignment = .center
@@ -200,11 +200,11 @@ final class ViewController: UIViewController {
         orientationControl.translatesAutoresizingMaskIntoConstraints = false
 
         // 坐标点管理
-        pointsLabel.text = "点击点：1"
+        pointsLabel.text = "Điểm bấm: 1"
         pointsLabel.font = .systemFont(ofSize: 14, weight: .medium)
         pointsLabel.textColor = .label
-        addPointButton.setTitle("＋ 添加当前输入点", for: .normal)
-        clearPointsButton.setTitle("清空点位", for: .normal)
+        addPointButton.setTitle("＋ Thêm điểm đang nhập", for: .normal)
+        clearPointsButton.setTitle("Xóa điểm", for: .normal)
         clearPointsButton.setTitleColor(.systemRed, for: .normal)
 
         let pointsRow = UIStackView(arrangedSubviews: [pointsLabel, addPointButton, clearPointsButton])
@@ -212,7 +212,7 @@ final class ViewController: UIViewController {
         pointsRow.spacing = 12
 
         // 连续模式
-        let continuousLabel = makeLabel("连续模式（后台运行，音量键急停）")
+        let continuousLabel = makeLabel("Chế độ liên tục (chạy nền, phím âm lượng để dừng)")
         continuousLabel.font = .systemFont(ofSize: 14)
         continuousSwitch.onTintColor = .systemBlue
         let continuousRow = UIStackView(arrangedSubviews: [continuousLabel, continuousSwitch])
@@ -225,10 +225,10 @@ final class ViewController: UIViewController {
         targetLabel.textColor = .secondaryLabel
         targetLabel.numberOfLines = 0
 
-        pickTargetButton.setTitle("选择目标 App…", for: .normal)
+        pickTargetButton.setTitle("Chọn App mục tiêu…", for: .normal)
         pickTargetButton.addTarget(self, action: #selector(pickTargetTapped), for: .touchUpInside)
 
-        enterTargetButton.setTitle("进入目标 App（显示悬浮球）", for: .normal)
+        enterTargetButton.setTitle("Vào App mục tiêu (hiện quả cầu nổi)", for: .normal)
         enterTargetButton.setTitleColor(.white, for: .normal)
         enterTargetButton.titleLabel?.font = .systemFont(ofSize: 15, weight: .semibold)
         enterTargetButton.backgroundColor = .systemIndigo
@@ -243,20 +243,20 @@ final class ViewController: UIViewController {
         // 悬浮球连点间隔（写入共享配置，tweak 读取）
         configureField(targetIntervalField, placeholder: "200", keyboard: .numberPad)
         targetIntervalField.text = "\(TargetAppManager.loadIntervalMs())"
-        let targetIntervalRow = makeFieldContainer(label: makeLabel("悬浮球连点间隔(ms)"), field: targetIntervalField)
+        let targetIntervalRow = makeFieldContainer(label: makeLabel("Khoảng cách bấm quả cầu (ms)"), field: targetIntervalField)
 
         // 状态
-        statusLabel.text = "未运行"
+        statusLabel.text = "Chưa chạy"
         statusLabel.textAlignment = .center
         statusLabel.font = .systemFont(ofSize: 16, weight: .semibold)
         statusLabel.textColor = .systemGray
-        countLabel.text = "点击次数：0"
+        countLabel.text = "Số lần bấm: 0"
         countLabel.textAlignment = .center
         countLabel.font = .monospacedDigitSystemFont(ofSize: 15, weight: .regular)
         countLabel.textColor = .secondaryLabel
 
         // 长按触发按钮（备用）
-        triggerButton.setTitle("长按开始点击", for: .normal)
+        triggerButton.setTitle("Giữ để bắt đầu bấm", for: .normal)
         triggerButton.setTitleColor(.white, for: .normal)
         triggerButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
         triggerButton.backgroundColor = .systemGreen
@@ -264,7 +264,7 @@ final class ViewController: UIViewController {
         triggerButton.translatesAutoresizingMaskIntoConstraints = false
         triggerButton.heightAnchor.constraint(equalToConstant: 64).isActive = true
 
-        hintLabel.text = "拖动圆圈调位置，长按圆圈开始点击、松开停止。\n连续模式：长按圆圈启动后切到目标 App，按音量键停止。"
+        hintLabel.text = "Kéo vòng tròn để chỉnh vị trí, giữ vòng tròn để bấm, thả ra để dừng.\nChế độ liên tục: giữ vòng tròn để chạy, chuyển sang App mục tiêu rồi bấm phím âm lượng để dừng."
         hintLabel.font = .systemFont(ofSize: 12)
         hintLabel.textColor = .secondaryLabel
         hintLabel.numberOfLines = 0
@@ -275,15 +275,15 @@ final class ViewController: UIViewController {
             canvas,
             sizeRow,
             inputRow,
-            makeSectionTitle("屏幕方向"),
+            makeSectionTitle("Hướng màn hình"),
             orientationControl,
-            makeSectionTitle("点击点位"),
+            makeSectionTitle("Danh sách điểm bấm"),
             pointsRow,
-            makeSectionTitle("越狱悬浮球（目标 App）"),
+            makeSectionTitle("Quả cầu nổi (jailbreak, App mục tiêu)"),
             targetLabel,
             targetRow,
             targetIntervalRow,
-            makeSectionTitle("运行方式"),
+            makeSectionTitle("Chế độ chạy"),
             continuousRow,
             statusLabel,
             countLabel,
@@ -390,7 +390,7 @@ final class ViewController: UIViewController {
             if validateAndStart() {
                 UIView.animate(withDuration: 0.15) {
                     self.triggerButton.backgroundColor = .systemRed
-                    self.triggerButton.setTitle(self.continuousMode ? "运行中（音量键停止）" : "运行中…按住", for: .normal)
+                    self.triggerButton.setTitle(self.continuousMode ? "Đang chạy (bấm phím âm lượng để dừng)" : "Đang chạy… giữ nguyên", for: .normal)
                 }
             }
         case .ended, .cancelled, .failed:
@@ -425,7 +425,7 @@ final class ViewController: UIViewController {
 
     @objc private func addPointTapped() {
         guard let (x, y) = readXY() else {
-            toast("请输入合法的 X/Y（0~1）")
+            toast("Hãy nhập X/Y hợp lệ (0~1)")
             return
         }
         points.append(TapPoint(x: x, y: y))
@@ -469,11 +469,11 @@ final class ViewController: UIViewController {
 
     private func validateAndStart() -> Bool {
         guard !points.isEmpty else {
-            toast("请先添加点击点")
+            toast("Hãy thêm điểm bấm trước")
             return false
         }
         guard HIDBridge.shared.connect() else {
-            toast("HID 连接失败：缺少 entitlement 或未在 TrollStore/越狱环境运行")
+            toast("Kết nối HID thất bại: thiếu entitlement hoặc không chạy trong TrollStore/jailbreak")
             return false
         }
         // 换算为原生坐标
@@ -491,7 +491,7 @@ final class ViewController: UIViewController {
                 if ClickerEngine.shared.state == .running {
                     ClickerEngine.shared.stop()
                     self.updateButtonUI()
-                    self.toast("音量键急停")
+                    self.toast("Đã dừng bằng phím âm lượng")
                 }
             }
         }
@@ -510,10 +510,10 @@ final class ViewController: UIViewController {
             guard let self else { return }
             switch state {
             case .idle:
-                self.statusLabel.text = "未运行"
+                self.statusLabel.text = "Chưa chạy"
                 self.statusLabel.textColor = .systemGray
             case .running:
-                self.statusLabel.text = "运行中"
+                self.statusLabel.text = "Đang chạy"
                 self.statusLabel.textColor = .systemGreen
             }
             self.clickCircle.isActive = (state == .running)
@@ -526,13 +526,13 @@ final class ViewController: UIViewController {
     }
 
     private func updateCount() {
-        countLabel.text = "点击次数：\(ClickerEngine.shared.tapCount)"
+        countLabel.text = "Số lần bấm: \(ClickerEngine.shared.tapCount)"
     }
 
     private func updateButtonUI() {
         let running = ClickerEngine.shared.state == .running
         triggerButton.backgroundColor = running ? .systemRed : .systemGreen
-        triggerButton.setTitle(running ? (continuousMode ? "运行中（音量键停止）" : "运行中…按住") : "长按开始点击", for: .normal)
+        triggerButton.setTitle(running ? (continuousMode ? "Đang chạy (bấm phím âm lượng để dừng)" : "Đang chạy… giữ nguyên") : "Giữ để bắt đầu bấm", for: .normal)
     }
 
     /// 将圆圈移动到第一个点击点位置
@@ -544,7 +544,7 @@ final class ViewController: UIViewController {
     }
 
     private func updatePointsLabel() {
-        pointsLabel.text = "点击点：\(points.count)"
+        pointsLabel.text = "Điểm bấm: \(points.count)"
     }
 
     private func syncUI() {
@@ -557,7 +557,7 @@ final class ViewController: UIViewController {
 
     private func toast(_ msg: String) {
         let alert = UIAlertController(title: nil, message: msg, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "好", style: .default))
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
 
