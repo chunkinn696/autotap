@@ -19,9 +19,9 @@ enum ScreenOrientation: Int, CaseIterable {
 
     var title: String {
         switch self {
-        case .portrait: return "竖屏"
-        case .landscapeLeft: return "横屏(Home右)"
-        case .landscapeRight: return "横屏(Home左)"
+        case .portrait: return "Dọc"
+        case .landscapeLeft: return "Ngang (Home phải)"
+        case .landscapeRight: return "Ngang (Home trái)"
         }
     }
 }
